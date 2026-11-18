@@ -1,0 +1,203 @@
+# ==============================================================================
+# Epistemic Guard - Deterministic Source Tiering Configuration
+# ==============================================================================
+# Zero-hallucination, deterministic classification of media domains.
+# Separates primary media & accountable journalism from unverified UGC & satire.
+
+schema_version: "1.0.0"
+
+# Suffix / Top-Level Domain (TLD) overrides
+tld_rules:
+  gov: TIER_1_PRIMARY
+  mil: TIER_1_PRIMARY
+  edu: TIER_1_PRIMARY
+
+# Default classification for domains not listed
+default_tier: TIER_UNKNOWN
+
+tiers:
+  TIER_1_PRIMARY:
+    name: "Tier 1: Primary Evidence & Wire Records"
+    description: >
+      Direct primary sources, official government/regulatory releases, global wire
+      services (Reuters, AP), primary academic journals, and certified non-partisan
+      fact-checking bodies.
+    trust_level: "HIGH"
+    domains:
+      # Global Wire Services
+      - reuters.com
+      - apnews.com
+      - afp.com
+      - bloomberg.com
+      - upi.com
+      - prnewswire.com
+      - businesswire.com
+      # Intergovernmental & Supranational Organizations
+      - un.org
+      - who.int
+      - nato.int
+      - interpol.int
+      - icj-cij.org
+      - europa.eu
+      # Key Public & Research Institutions
+      - whitehouse.gov
+      - congress.gov
+      - supremecourt.gov
+      - cdc.gov
+      - nih.gov
+      - nasa.gov
+      - sec.gov
+      - federalreserve.gov
+      - gov.uk
+      # Peer-Reviewed Scientific Journals & Registries
+      - nature.com
+      - science.org
+      - cell.com
+      - thelancet.com
+      - nejm.org
+      - pnas.org
+      - arxiv.org
+      - biorxiv.org
+      - medrxiv.org
+      - ncbi.nlm.nih.gov
+      # Certified Non-Partisan Fact-Checkers (IFCN Code of Principles)
+      - factcheck.org
+      - politifact.com
+      - snopes.com
+      - fullfact.org
+      - leadstories.com
+      - checkyourfact.com
+
+  TIER_2_ESTABLISHED_EDITORIAL:
+    name: "Tier 2: Established Editorial & Accountable Newsrooms"
+    description: >
+      Major newsrooms with formal editorial oversight, named reporter bylines,
+      transparent corrections policies, and legal accountability for reporting.
+    trust_level: "MEDIUM_HIGH"
+    domains:
+      - nytimes.com
+      - washingtonpost.com
+      - wsj.com
+      - ft.com
+      - theguardian.com
+      - bbc.com
+      - bbc.co.uk
+      - npr.org
+      - pbs.org
+      - economist.com
+      - theatlantic.com
+      - newyorker.com
+      - time.com
+      - propublica.org
+      - c-span.org
+      - lemonde.fr
+      - spiegel.de
+      - dw.com
+      - aljazeera.com
+      - latimes.com
+      - chicagotribune.com
+      - bostonglobe.com
+      - thetimes.co.uk
+      - telegraph.co.uk
+      - smh.com.au
+      - theglobeandmail.com
+      - cbc.ca
+      - abc.net.au
+      - cnbc.com
+      - marketwatch.com
+      - usatoday.com
+      - cbsnews.com
+      - nbcnews.com
+      - abcnews.go.com
+      - cnn.com
+
+  TIER_3_SECONDARY_ANALYSIS:
+    name: "Tier 3: Secondary Analysis, Trade Press & Curated Commentary"
+    description: >
+      Specialized trade press, tech publications, opinion commentary, regional
+      outlets, and curated analytical newsletters.
+    trust_level: "MEDIUM"
+    domains:
+      - techcrunch.com
+      - theverge.com
+      - arstechnica.com
+      - wired.com
+      - axios.com
+      - semafor.com
+      - politico.com
+      - thehill.com
+      - vox.com
+      - slate.com
+      - forbes.com
+      - businessinsider.com
+      - huffpost.com
+      - newsweek.com
+      - dailybeast.com
+      - foreignpolicy.com
+      - foreignaffairs.com
+      - defenseone.com
+      - engadget.com
+      - venturebeat.com
+      - zdnet.com
+      - mashable.com
+      - substack.com
+      - medium.com
+
+  TIER_4_USER_GENERATED:
+    name: "Tier 4: Social Media & User-Generated Content"
+    description: >
+      Platforms where any user can publish content without prior editorial verification,
+      bylines, or correction protocols.
+    trust_level: "LOW_UNVERIFIED"
+    domains:
+      - x.com
+      - twitter.com
+      - t.co
+      - facebook.com
+      - fb.com
+      - fb.watch
+      - instagram.com
+      - tiktok.com
+      - reddit.com
+      - telegram.org
+      - t.me
+      - threads.net
+      - youtube.com
+      - youtu.be
+      - linkedin.com
+      - pinterest.com
+      - tumblr.com
+      - snapchat.com
+      - 4chan.org
+      - 8kun.top
+      - weibo.com
+      - vk.com
+      - mastodon.social
+      - bsky.app
+      - rumble.com
+      - bitchute.com
+      - gettr.com
+      - truthsocial.com
+      - quora.com
+      - discord.com
+      - discord.gg
+
+  TIER_5_SATIRE_PARODY:
+    name: "Tier 5: Satire & Parody Outlets"
+    description: >
+      Humorous, fictional, or satirical publications whose fictional headlines
+      are frequently recycled or misconstrued as real breaking news.
+    trust_level: "SATIRE"
+    domains:
+      - theonion.com
+      - babylonbee.com
+      - clickhole.com
+      - newsthump.com
+      - theshovel.com.au
+      - thebeaverton.com
+      - waterfordwhispersnews.com
+      - private-eye.co.uk
+      - duffelblog.com
+      - reductress.com
+      - thehardtimes.net
+      - satirewire.com
