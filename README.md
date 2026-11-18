@@ -6,7 +6,7 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Pydantic v2](https://img.shields.io/badge/pydantic-v2.7+-green.svg)](https://docs.pydantic.dev/)
-[![Tests Passing](https://img.shields.io/badge/tests-58%20passed-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-63%20passed-brightgreen.svg)](tests/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 *A deterministic, zero-hallucination verification foundation to halt viral misinformation before emotional contagion spreads.*
@@ -91,6 +91,11 @@ epistemic-guard/
 │       ├── extraction/
 │       │   ├── __init__.py
 │       │   └── extractor.py    # Claim, quote & emotional framing extraction engine
+│       ├── graph/
+│       │   ├── __init__.py
+│       │   ├── state.py        # Shared LangGraph state schema
+│       │   ├── nodes.py        # Extraction, audit, and synthesis graph nodes
+│       │   └── workflow.py     # EpistemicGuardPipeline & compiled StateGraph
 │       ├── llm/
 │       │   ├── __init__.py
 │       │   └── client.py       # Model-agnostic structured LLM client
@@ -105,7 +110,8 @@ epistemic-guard/
     ├── test_schemas.py             # Data contracts & validation test suite
     ├── test_domain_auditor.py      # Provenance rules & source tiering test suite
     ├── test_extractor.py           # Extraction & Phase 0/1 handoff test suite
-    └── test_provenance_resolver.py # Active search, circular reporting & drift tests
+    ├── test_provenance_resolver.py # Active search, circular reporting & drift tests
+    └── test_workflow.py            # End-to-end two-sided listening pipeline tests
 ```
 
 ---
@@ -248,7 +254,8 @@ REQUIRE_PRIMARY_EVIDENCE_FOR_BREAKING=true
 - [x] **Phase 0:** Foundation, Repository Scaffold, Data Contracts, and Deterministic Source Tiering (Zero-Hallucination).
 - [x] **Phase 1:** Model-Agnostic Claim, Quote & Emotional Framing Extraction (`ClaimExtractor`, `StructuredLLMClient`, `extract_and_audit`).
 - [x] **Phase 2:** The 3-Criteria Provenance Retrieval Engine (`ProvenanceInvestigator`, `DuckDuckGoSearchProvider`, `TemporalAuditResult`, Circular Reporting Defense).
-- [ ] **Phase 3:** Two-Sided Listening Topology & Multi-Perspective Synthesis.
+- [x] **Phase 3:** Two-Sided Listening Topology & Multi-Perspective Synthesis (`EpistemicGuardPipeline`, `LangGraph`, Steel-Manned Summaries & Provenance Asymmetry).
+- [ ] **Phase 4:** CLI, REST API & Model Context Protocol (MCP) Server.
 
 ---
 

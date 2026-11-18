@@ -416,3 +416,99 @@ class ExtractionBatchResult(BaseModel):
         description="List of discrete extracted claims.",
     )
 
+
+class ClaimWithAudit(BaseModel):
+    """Pairing of an extracted claim with its completed provenance audit result."""
+
+    claim: ExtractedClaim = Field(description="The extracted claim.")
+    audit: ProvenanceAuditResult = Field(description="The deterministic provenance audit result.")
+
+
+class NarrativeSideSummary(BaseModel):
+    """Summary of a specific narrative perspective with steel-manned arguments and deterministic metrics."""
+
+    side_label: str = Field(description="Narrative perspective identifier (e.g. 'Side A', 'Side B', 'Neutral').")
+    steel_manned_summary: str = Field(
+        description="Charitable, non-ideological summary of the core argument from this perspective.",
+    )
+    key_arguments: list[str] = Field(
+        default_factory=list,
+        description="List of primary arguments or assertions advanced by this perspective.",
+    )
+    total_claims: int = Field(default=0, ge=0, description="Total number of claims attributed to this side.")
+    verified_shareable_count: int = Field(
+        default=0,
+        ge=0,
+        description="Number of claims verified by primary media or corroborated editorial journalism.",
+    )
+    unconfirmed_blocked_count: int = Field(
+        default=0,
+        ge=0,
+        description="Number of claims failing provenance criteria or relying on unverified social media.",
+    )
+    recycled_content_count: int = Field(
+        default=0,
+        ge=0,
+        description="Number of claims detected as recycled historic quotes or out-of-context footage.",
+    )
+    average_emotional_arousal: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Average emotional arousal score (0.0 to 1.0) of claims on this side.",
+    )
+
+
+class SideNarrativeDraft(BaseModel):
+    """Draft narrative summary produced by the LLM during synthesis."""
+
+    side_label: str = Field(description="Identifier matching 'Side A', 'Side B', or 'Neutral'.")
+    steel_manned_summary: str = Field(description="Steel-manned explanation of this perspective.")
+    key_arguments: list[str] = Field(default_factory=list, description="Core arguments.")
+
+
+class SynthesisLLMOutput(BaseModel):
+    """Structured LLM completion contract for multi-perspective synthesis."""
+
+    topic_title: str = Field(description="Descriptive title of the overall topic or controversy.")
+    side_drafts: list[SideNarrativeDraft] = Field(
+        default_factory=list,
+        description="Steel-manned summaries for each narrative side identified.",
+    )
+    deescalation_guidance: str = Field(
+        description="Calm, non-preachy de-escalation guidance emphasizing the 3 provenance criteria.",
+    )
+
+
+class TwoSidedListeningReport(BaseModel):
+    """Final comprehensive report synthesizing multi-perspective arguments and provenance asymmetry."""
+
+    topic: str = Field(description="The primary topic or controversy examined.")
+    generated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Timestamp when the report was generated.",
+    )
+    overall_emotional_temperature: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Aggregate emotional arousal level across all analyzed claims (0.0=calm, 1.0=fever pitch).",
+    )
+    has_high_emotional_contagion: bool = Field(
+        description="True if discourse exhibits viral outrage/panic markers warranting pause before sharing.",
+    )
+    provenance_asymmetry_detected: bool = Field(
+        description="True if one perspective holds strong primary/editorial backing while the opposing perspective relies on unconfirmed social media or recycled claims.",
+    )
+    perspectives: list[NarrativeSideSummary] = Field(
+        default_factory=list,
+        description="Steel-manned perspectives with deterministic provenance scores.",
+    )
+    audited_claims: list[ClaimWithAudit] = Field(
+        default_factory=list,
+        description="All individual claims evaluated during synthesis.",
+    )
+    deescalation_guidance: str = Field(
+        description="Actionable, pre-share friction guidance advising readers on verification.",
+    )
+
+

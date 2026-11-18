@@ -7,16 +7,21 @@ from pydantic import ValidationError
 from epistemic_guard.config import Settings, get_settings
 from epistemic_guard.schemas import (
     ClaimAuditRequest,
+    ClaimWithAudit,
     DomainAuditResult,
     EmotionalFraming,
     EvidenceProvenance,
     EvidenceType,
     ExtractedClaim,
     ExtractionBatchResult,
+    NarrativeSideSummary,
     ProvenanceAuditResult,
     ProvenanceVerdict,
+    SideNarrativeDraft,
     SourceRecord,
     SourceTier,
+    SynthesisLLMOutput,
+    TwoSidedListeningReport,
     WhenProvenance,
     WhereProvenance,
 )
@@ -290,4 +295,51 @@ class TestPhase1ExtractionSchemas:
         assert len(restored.claims) == 1
         assert restored.claims[0].speaker == "Senator Smith"
         assert restored.claims[0].narrative_side == "Side B"
+
+
+class TestPhase3SynthesisSchemas:
+    def test_narrative_side_summary(self) -> None:
+        summary = NarrativeSideSummary(
+            side_label="Side A",
+            steel_manned_summary="Strongest coherent version of the policy perspective.",
+            key_arguments=["Key point 1", "Key point 2"],
+            total_claims=3,
+            verified_shareable_count=2,
+            unconfirmed_blocked_count=1,
+            recycled_content_count=0,
+            average_emotional_arousal=0.35,
+        )
+        assert summary.side_label == "Side A"
+        assert summary.verified_shareable_count == 2
+        assert summary.unconfirmed_blocked_count == 1
+        assert summary.average_emotional_arousal == 0.35
+
+    def test_two_sided_listening_report_roundtrip(self) -> None:
+        report = TwoSidedListeningReport(
+            topic="Bilateral Treaty Debate",
+            generated_at=datetime.now(timezone.utc),
+            overall_emotional_temperature=0.62,
+            has_high_emotional_contagion=False,
+            provenance_asymmetry_detected=True,
+            perspectives=[
+                NarrativeSideSummary(
+                    side_label="Side A",
+                    steel_manned_summary="Summary A",
+                    key_arguments=["Arg 1"],
+                    total_claims=1,
+                    verified_shareable_count=1,
+                    unconfirmed_blocked_count=0,
+                    recycled_content_count=0,
+                    average_emotional_arousal=0.25,
+                )
+            ],
+            audited_claims=[],
+            deescalation_guidance="Take time to check wire reporting before sharing.",
+        )
+        json_str = report.model_dump_json()
+        restored = TwoSidedListeningReport.model_validate_json(json_str)
+        assert restored.topic == "Bilateral Treaty Debate"
+        assert restored.provenance_asymmetry_detected is True
+        assert restored.overall_emotional_temperature == 0.62
+
 
