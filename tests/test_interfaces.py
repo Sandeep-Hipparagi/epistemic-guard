@@ -156,7 +156,7 @@ class TestFastAPIInterface:
         client = TestClient(create_app())
         resp = client.get("/health")
         assert resp.status_code == 200
-        assert resp.json() == {"status": "ok", "version": "0.1.0"}
+        assert resp.json() == {"status": "ok", "version": "0.2.0"}
 
     def test_audit_url_endpoint(self) -> None:
         client = TestClient(create_app())

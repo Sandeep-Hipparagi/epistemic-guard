@@ -34,7 +34,7 @@ def create_app(
     """Create and configure the FastAPI application with dependency injection."""
     app = FastAPI(
         title="Epistemic Guard API",
-        version="0.1.0",
+        version="0.2.0",
         description="Model-Agnostic Provenance Auditing and Two-Sided Listening Service",
     )
 
@@ -44,7 +44,7 @@ def create_app(
     @app.get("/health")
     def health_check() -> dict[str, str]:
         """Health and liveness check endpoint."""
-        return {"status": "ok", "version": "0.1.0"}
+        return {"status": "ok", "version": "0.2.0"}
 
     @app.get("/", response_class=HTMLResponse)
     def web_ui_endpoint(claim: Optional[str] = None) -> HTMLResponse:
