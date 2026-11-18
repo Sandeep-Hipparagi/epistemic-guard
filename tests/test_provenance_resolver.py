@@ -253,7 +253,7 @@ class TestProvenanceInvestigatorScenarios:
                 SearchHit(
                     title="Fed Lowers Rate - Reuters",
                     url="https://www.reuters.com/markets/us/fed-rate-cut-2026",
-                    snippet="The Federal Reserve cut rates today during the official press briefing.",
+                    snippet="The Federal Reserve cut rates today during the official press briefing: 'The committee decided to lower the policy rate by 25 basis points.'",
                     published_date="2026-11-19",
                     source_query="fed rate cut",
                 ),

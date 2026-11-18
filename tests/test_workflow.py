@@ -323,7 +323,7 @@ class TestEpistemicGuardPipeline:
                 SearchHit(
                     title="AP News - City Transit Update",
                     url="https://apnews.com/article/transit-update",
-                    snippet="Official city transit announcement today.",
+                    snippet="Official city transit announcement today: Transit repairs will complete by 5 PM.",
                     published_date="2026-11-19",
                     source_query="transit repairs",
                 )

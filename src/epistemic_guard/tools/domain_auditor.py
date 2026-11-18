@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -19,6 +21,100 @@ from epistemic_guard.schemas import (
     WhenProvenance,
     WhereProvenance,
 )
+
+logger = logging.getLogger(__name__)
+
+PROTECTED_TIER_BRANDS: tuple[str, ...] = (
+    "reuters",
+    "apnews",
+    "bbc",
+    "nytimes",
+    "thehindu",
+    "bloomberg",
+    "nature",
+    "c-span",
+    "washingtonpost",
+    "wsj",
+    "theguardian",
+    "cnn",
+)
+
+DECEPTIVE_MODIFIERS: tuple[str, ...] = (
+    "breaking",
+    "news",
+    "live",
+    "alert",
+    "alerts",
+    "online",
+    "wire",
+    "feed",
+    "daily",
+    "official",
+    "media",
+    "update",
+    "tv",
+    "post",
+    "press",
+)
+
+
+def detect_lookalike_domain(
+    registered_domain: str,
+    canonical_domains: Optional[set[str]] = None,
+) -> Optional[str]:
+    """Detect if an unknown registered domain is a deceptive lookalike or typosquatting brand impersonation."""
+    if not registered_domain:
+        return None
+
+    reg_clean = registered_domain.strip().lower()
+
+    canonicals = canonical_domains or {
+        "reuters.com",
+        "apnews.com",
+        "afp.com",
+        "bloomberg.com",
+        "nature.com",
+        "nytimes.com",
+        "washingtonpost.com",
+        "wsj.com",
+        "ft.com",
+        "theguardian.com",
+        "bbc.com",
+        "bbc.co.uk",
+        "c-span.org",
+        "thehindu.com",
+        "cnn.com",
+    }
+
+    if reg_clean in canonicals:
+        return None
+
+    domain_part = reg_clean.split(".")[0] if "." in reg_clean else reg_clean
+    tokens = re.split(r"[-_0-9]+", domain_part)
+
+    for brand in PROTECTED_TIER_BRANDS:
+        # Check if brand itself contains a hyphen (e.g. c-span)
+        if "-" in brand:
+            if brand in domain_part and domain_part != brand:
+                return brand
+
+        # Check hyphenated or separated tokens: e.g. reuters-breaking, bbc-alert, nature-reports
+        if brand in tokens and domain_part != brand:
+            return brand
+
+        # Check deceptive prefix: e.g. reutersbreaking.com, bbclive.com
+        if domain_part.startswith(brand):
+            rem = domain_part[len(brand):].lstrip("-_")
+            if rem in DECEPTIVE_MODIFIERS or any(rem.startswith(m) for m in DECEPTIVE_MODIFIERS):
+                return brand
+
+        # Check deceptive suffix: e.g. breakingreuters.com
+        if domain_part.endswith(brand):
+            pre = domain_part[:-len(brand)].rstrip("-_")
+            if pre in DECEPTIVE_MODIFIERS or any(pre.endswith(m) for m in DECEPTIVE_MODIFIERS):
+                return brand
+
+    return None
 
 
 class DomainAuditor:
@@ -144,6 +240,9 @@ class DomainAuditor:
                 is_social_media=False,
                 is_satire=False,
                 is_primary_or_editorial=False,
+                is_lookalike=False,
+                impersonated_brand=None,
+                warning_flags=[],
                 notes="Empty URL provided.",
             )
 
@@ -184,6 +283,23 @@ class DomainAuditor:
         elif tier == SourceTier.TIER_UNKNOWN:
             notes.append("Unlisted or unrecognized domain. Defaulting to Tier Unknown.")
 
+        # Check lookalike / typosquatting impersonation defense
+        canonical = (
+            self._tier_domains[SourceTier.TIER_1_PRIMARY]
+            | self._tier_domains[SourceTier.TIER_2_ESTABLISHED_EDITORIAL]
+        )
+        impersonated_brand = detect_lookalike_domain(registered_domain, canonical_domains=canonical)
+        is_lookalike = impersonated_brand is not None
+
+        domain_flags: list[str] = []
+        if is_lookalike:
+            tier = SourceTier.TIER_4_USER_GENERATED
+            tier_name = "Lookalike Impersonation Domain"
+            is_social = True
+            is_primary_or_editorial = False
+            notes.insert(0, f"Deceptive lookalike domain impersonating '{impersonated_brand}'. Classified as unverified UGC.")
+            domain_flags.append("LOOKALIKE_DOMAIN_IMPERSONATION")
+
         return DomainAuditResult(
             url=cleaned_url,
             raw_domain=raw_domain,
@@ -195,6 +311,9 @@ class DomainAuditor:
             is_social_media=is_social,
             is_satire=is_satire,
             is_primary_or_editorial=is_primary_or_editorial,
+            is_lookalike=is_lookalike,
+            impersonated_brand=impersonated_brand,
+            warning_flags=domain_flags,
             notes="; ".join(notes) if notes else None,
         )
 
@@ -416,6 +535,13 @@ class DomainAuditor:
         if has_satire:
             warning_flags.append("SATIRE_PARODY_SOURCE")
 
+        has_lookalike = any(
+            s.domain_audit and (s.domain_audit.is_lookalike or "LOOKALIKE_DOMAIN_IMPERSONATION" in s.domain_audit.warning_flags)
+            for s in all_sources
+        )
+        if has_lookalike and "LOOKALIKE_DOMAIN_IMPERSONATION" not in warning_flags:
+            warning_flags.insert(0, "LOOKALIKE_DOMAIN_IMPERSONATION")
+
         has_tier1 = any(s.domain_audit and s.domain_audit.tier == SourceTier.TIER_1_PRIMARY for s in all_sources)
         has_tier2 = any(s.domain_audit and s.domain_audit.tier == SourceTier.TIER_2_ESTABLISHED_EDITORIAL for s in all_sources)
         all_ugc = bool(all_sources) and all(
@@ -445,6 +571,14 @@ class DomainAuditor:
             recommendation = (
                 "DO NOT SHARE. The originating source is a recognized satire or parody outlet. "
                 "This claim was written as humor or satire and is not a factual event."
+            )
+        elif has_lookalike:
+            verdict = ProvenanceVerdict.DO_NOT_SHARE_UNCONFIRMED
+            is_shareable = False
+            confidence = 0.15
+            recommendation = (
+                "DO NOT SHARE (LOOKALIKE DOMAIN IMPERSONATION DETECTED). The cited source uses a deceptive "
+                "lookalike or typosquatted domain designed to impersonate an established news outlet or wire service."
             )
         elif not all_sources:
             verdict = ProvenanceVerdict.DO_NOT_SHARE_UNCONFIRMED
@@ -479,12 +613,12 @@ class DomainAuditor:
                 f"DO NOT SHARE (UNCONFIRMED). The claim failed critical provenance checks: missing {missing_str}. "
                 "Hold off until independent corroboration is established."
             )
-        elif has_tier1 and (has_primary_media or has_tier1):
+        elif has_tier1 or has_primary_media:
             verdict = ProvenanceVerdict.VERIFIED_PRIMARY
             is_shareable = True
             confidence = 0.95 if has_primary_media and is_exact_timestamp else 0.88
             recommendation = (
-                "VERIFIED. Backed by Tier 1 primary sources / wire reporting with confirmed origin and timestamp. "
+                "VERIFIED. Backed by primary media / Tier 1 wire reporting with confirmed origin and timestamp. "
                 "Clear to reference with direct citation to the primary record."
             )
         elif has_tier2:

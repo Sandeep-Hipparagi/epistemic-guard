@@ -15,6 +15,10 @@ from epistemic_guard.schemas import (
     SourceTier,
 )
 from epistemic_guard.tools.domain_auditor import DomainAuditor
+from epistemic_guard.tools.quote_matcher import (
+    QuoteIntegrityResult,
+    verify_quote_integrity,
+)
 from epistemic_guard.tools.search import (
     DuckDuckGoSearchProvider,
     MockSearchProvider,
@@ -192,6 +196,13 @@ class ProvenanceInvestigator:
             drift_threshold_days=self.settings.temporal_drift_days_threshold,
         )
 
+        # 5b. Quote fidelity & mutation verification
+        quote_audit = verify_quote_integrity(
+            verbatim_quote=claim.verbatim_quote,
+            hits=all_hits,
+            domain_auditor=self.auditor,
+        )
+
         # 6. Build enriched ClaimAuditRequest
         # Adopt earliest verified date if alleged_date is missing or confirmed
         resolved_date = claim.alleged_date or temporal_audit.earliest_found_date_iso
@@ -200,6 +211,8 @@ class ProvenanceInvestigator:
         notes_parts: list[str] = []
         if claim.verbatim_quote:
             notes_parts.append(f"Verbatim quote: '{claim.verbatim_quote}'")
+        if quote_audit.has_verbatim_quote:
+            notes_parts.append(f"Quote fidelity: {quote_audit.integrity_note}")
         notes_parts.append(f"Narrative stance: {claim.narrative_side}")
         notes_parts.append(f"Temporal analysis: {temporal_audit.temporal_note}")
 
@@ -249,6 +262,31 @@ class ProvenanceInvestigator:
                     "when": updated_when,
                     "warning_flags": updated_flags,
                     "recommendation": recycled_recommendation,
+                }
+            )
+
+        # 9. Defense Invariant: Quote Mutation & Misattribution
+        if quote_audit.is_suspected_mutation:
+            updated_flags = list(audit_result.warning_flags)
+            if "QUOTE_MUTATION_DISTORTION" not in updated_flags:
+                updated_flags.insert(0, "QUOTE_MUTATION_DISTORTION")
+
+            mutation_recommendation = (
+                f"DO NOT SHARE (DOCTORED / MUTATED QUOTE). {quote_audit.integrity_note} "
+                "Subtly altering quotes while attributing them to credible public figures or real events "
+                "is an adversarial disinformation technique designed to deceive."
+            )
+
+            audit_result = audit_result.model_copy(
+                update={
+                    "verdict": (
+                        ProvenanceVerdict.DO_NOT_SHARE_UNCONFIRMED
+                        if audit_result.verdict != ProvenanceVerdict.SATIRE_PARODY_ALERT
+                        else ProvenanceVerdict.SATIRE_PARODY_ALERT
+                    ),
+                    "is_shareable": False,
+                    "warning_flags": updated_flags,
+                    "recommendation": mutation_recommendation,
                 }
             )
 

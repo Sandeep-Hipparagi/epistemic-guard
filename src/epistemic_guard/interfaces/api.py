@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Optional
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from epistemic_guard.graph.workflow import EpistemicGuardPipeline
+from epistemic_guard.interfaces.web_ui import render_web_ui
 from epistemic_guard.schemas import DomainAuditResult, TwoSidedListeningReport
 from epistemic_guard.tools.domain_auditor import DomainAuditor
 from epistemic_guard.tools.temporal import parse_flexible_date
@@ -43,6 +45,11 @@ def create_app(
     def health_check() -> dict[str, str]:
         """Health and liveness check endpoint."""
         return {"status": "ok", "version": "0.1.0"}
+
+    @app.get("/", response_class=HTMLResponse)
+    def web_ui_endpoint(claim: Optional[str] = None) -> HTMLResponse:
+        """Serve the zero-build Pre-Share Web Friction Studio and bookmarklet interface."""
+        return HTMLResponse(content=render_web_ui(prefill_claim=claim))
 
     @app.post("/v1/audit/url", response_model=DomainAuditResult)
     def audit_url_endpoint(req: AuditUrlRequest) -> DomainAuditResult:

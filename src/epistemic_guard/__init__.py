@@ -13,6 +13,7 @@ from epistemic_guard.interfaces import (
     create_app,
     create_mcp_server,
 )
+from epistemic_guard.interfaces.web_ui import render_web_ui
 from epistemic_guard.schemas import (
     ClaimAuditRequest,
     ClaimWithAudit,
@@ -33,8 +34,13 @@ from epistemic_guard.schemas import (
     WhenProvenance,
     WhereProvenance,
 )
-from epistemic_guard.tools.domain_auditor import DomainAuditor
+from epistemic_guard.tools.domain_auditor import DomainAuditor, detect_lookalike_domain
 from epistemic_guard.tools.provenance_resolver import ProvenanceInvestigator
+from epistemic_guard.tools.quote_matcher import (
+    QuoteIntegrityResult,
+    compute_quote_similarity,
+    verify_quote_integrity,
+)
 from epistemic_guard.tools.search import (
     DuckDuckGoSearchProvider,
     MockSearchProvider,
@@ -49,7 +55,7 @@ from epistemic_guard.tools.temporal import (
     parse_flexible_date,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",
@@ -69,6 +75,10 @@ __all__ = [
     "ExtractedClaim",
     "ExtractionBatchResult",
     "DomainAuditor",
+    "detect_lookalike_domain",
+    "QuoteIntegrityResult",
+    "compute_quote_similarity",
+    "verify_quote_integrity",
     "StructuredLLMClient",
     "clean_json_payload",
     "ClaimExtractor",
@@ -94,4 +104,5 @@ __all__ = [
     "cli_app",
     "create_app",
     "create_mcp_server",
+    "render_web_ui",
 ]

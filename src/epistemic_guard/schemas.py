@@ -100,6 +100,18 @@ class DomainAuditResult(BaseModel):
         default=False,
         description="True if domain is Tier 1 (Primary) or Tier 2 (Established Editorial).",
     )
+    is_lookalike: bool = Field(
+        default=False,
+        description="True if domain is a deceptive lookalike/typosquatted impersonation of an established brand.",
+    )
+    impersonated_brand: Optional[str] = Field(
+        default=None,
+        description="Protected brand being impersonated if lookalike detected.",
+    )
+    warning_flags: list[str] = Field(
+        default_factory=list,
+        description="Specific domain risk warning flags.",
+    )
     notes: Optional[str] = Field(default=None, description="Additional context or rule notes.")
 
 
