@@ -322,3 +322,97 @@ class ProvenanceAuditResult(BaseModel):
             ProvenanceVerdict.VERIFIED_PRIMARY,
             ProvenanceVerdict.CORROBORATED_SECONDARY,
         )
+
+
+class EmotionalFraming(BaseModel):
+    """Emotional arousal, tone, and rhetorical manipulation profile of a claim or text."""
+
+    arousal_score: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Arousal intensity score from 0.0 (calm/neutral) to 1.0 (extreme viral panic/outrage).",
+    )
+    primary_emotion: str = Field(
+        description="Dominant emotion detected (e.g. 'outrage', 'fear', 'vindication', 'moral_disgust', 'neutral').",
+    )
+    manipulation_cues: list[str] = Field(
+        default_factory=list,
+        description="List of detected rhetorical manipulation signals (e.g. 'all_caps_urgency', 'unverified_screenshot_appeal').",
+    )
+
+
+class ExtractedClaim(BaseModel):
+    """An individual atomic claim or quote extracted from unstructured raw text."""
+
+    claim_id: str = Field(description="Unique deterministic or sequential claim identifier.")
+    speaker: Optional[str] = Field(
+        default=None,
+        description="Explicitly named speaker or entity making the statement, if mentioned in text.",
+    )
+    verbatim_quote: Optional[str] = Field(
+        default=None,
+        description="Exact quote enclosed in quotation marks or directly attributed in text, if any.",
+    )
+    normalized_claim: str = Field(
+        description="Neutral, standardized assertion capturing the core testable claim.",
+    )
+    alleged_venue: Optional[str] = Field(
+        default=None,
+        description="Explicit platform, press room, podium, or event mentioned in text (Where). None if unstated.",
+    )
+    alleged_date: Optional[str] = Field(
+        default=None,
+        description="Explicit date or timestamp string mentioned in text (When). None if unstated.",
+    )
+    cited_urls: list[str] = Field(
+        default_factory=list,
+        description="List of URLs explicitly associated with or linked to this claim.",
+    )
+    narrative_side: str = Field(
+        default="Neutral",
+        description="Perspective or narrative stance in a controversy (e.g. 'Side A', 'Side B', 'Neutral').",
+    )
+    emotional_framing: EmotionalFraming = Field(
+        description="Emotional arousal and manipulation signals for this claim.",
+    )
+
+    def to_audit_request(self) -> ClaimAuditRequest:
+        """Bridge Phase 1 into Phase 0: Convert this extracted claim into a ClaimAuditRequest."""
+        sources = [
+            SourceRecord(
+                url=url,
+                quote_excerpt=self.verbatim_quote,
+            )
+            for url in self.cited_urls
+            if url and url.strip()
+        ]
+        return ClaimAuditRequest(
+            claim_text=self.normalized_claim,
+            speaker_or_subject=self.speaker,
+            alleged_venue=self.alleged_venue,
+            alleged_date=self.alleged_date,
+            sources=sources,
+            raw_urls=list(self.cited_urls),
+            emotional_intensity_score=self.emotional_framing.arousal_score,
+            context_notes=(
+                f"Verbatim quote: '{self.verbatim_quote}' | Narrative stance: {self.narrative_side}"
+                if self.verbatim_quote
+                else f"Narrative stance: {self.narrative_side}"
+            ),
+        )
+
+
+class ExtractionBatchResult(BaseModel):
+    """Aggregate result of extracting claims and emotional framing from a piece of raw text."""
+
+    raw_text_hash: str = Field(description="SHA-256 or truncated hash of the source input text.")
+    overall_emotional_intensity: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Aggregate emotional volatility score across the entire input text.",
+    )
+    claims: list[ExtractedClaim] = Field(
+        default_factory=list,
+        description="List of discrete extracted claims.",
+    )
+

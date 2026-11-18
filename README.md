@@ -6,7 +6,7 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Pydantic v2](https://img.shields.io/badge/pydantic-v2.7+-green.svg)](https://docs.pydantic.dev/)
-[![Tests Passing](https://img.shields.io/badge/tests-33%20passed-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-47%20passed-brightgreen.svg)](tests/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 *A deterministic, zero-hallucination verification foundation to halt viral misinformation before emotional contagion spreads.*
@@ -81,18 +81,28 @@ epistemic-guard/
 ├── .gitignore                  # Git exclusions for Python & environments
 ├── README.md                   # System documentation & methodology
 ├── config/
-│   └── source_tiers.yaml       # Deterministic domain tiering rules & TLD overrides
+│   ├── source_tiers.yaml       # Deterministic domain tiering rules & TLD overrides
+│   └── prompts.yaml            # Versioned prompt templates for claim & quote extraction
 ├── src/
 │   └── epistemic_guard/
 │       ├── __init__.py         # Public API exports
 │       ├── config.py           # Pydantic Settings with OpenAI-compatible spec
 │       ├── schemas.py          # Strict Pydantic v2 data contracts
+│       ├── extraction/
+│       │   ├── __init__.py
+│       │   └── extractor.py    # Claim, quote & emotional framing extraction engine
+│       ├── llm/
+│       │   ├── __init__.py
+│       │   └── client.py       # Model-agnostic structured LLM client
 │       └── tools/
 │           ├── __init__.py
 │           └── domain_auditor.py # Deterministic URL auditor & provenance engine
 └── tests/
     ├── __init__.py
     ├── test_schemas.py         # Data contracts & validation test suite
+    ├── test_domain_auditor.py  # Provenance rules & source tiering test suite
+    └── test_extractor.py       # Extraction & Phase 0/1 handoff test suite
+```
     └── test_domain_auditor.py  # Provenance rules & source tiering test suite
 ```
 
@@ -234,9 +244,9 @@ REQUIRE_PRIMARY_EVIDENCE_FOR_BREAKING=true
 ## 🗺️ Roadmap
 
 - [x] **Phase 0:** Foundation, Repository Scaffold, Data Contracts, and Deterministic Source Tiering (Zero-Hallucination).
-- [ ] **Phase 1:** Graph Reasoning Engine & Two-Sided Listening Topology (Claim De-escalation & Multiple Perspective Synthesis).
-- [ ] **Phase 2:** Model-Agnostic LLM Verification Nodes (Local Ollama/vLLM & Cloud Providers with structured JSON schema outputs).
-- [ ] **Phase 3:** Real-time Web Search & Archival Video/Audio Timestamp Corroboration.
+- [x] **Phase 1:** Model-Agnostic Claim, Quote & Emotional Framing Extraction (`ClaimExtractor`, `StructuredLLMClient`, `extract_and_audit`).
+- [ ] **Phase 2:** Real-Time Corroboration & Web Search Nodes.
+- [ ] **Phase 3:** Two-Sided Listening Topology & Multi-Perspective Synthesis.
 
 ---
 

@@ -8,8 +8,11 @@ from epistemic_guard.config import Settings, get_settings
 from epistemic_guard.schemas import (
     ClaimAuditRequest,
     DomainAuditResult,
+    EmotionalFraming,
     EvidenceProvenance,
     EvidenceType,
+    ExtractedClaim,
+    ExtractionBatchResult,
     ProvenanceAuditResult,
     ProvenanceVerdict,
     SourceRecord,
@@ -239,3 +242,52 @@ class TestConfigSettings:
         s1 = get_settings()
         s2 = get_settings()
         assert s1 is s2
+
+
+class TestPhase1ExtractionSchemas:
+    def test_emotional_framing_valid(self) -> None:
+        framing = EmotionalFraming(
+            arousal_score=0.88,
+            primary_emotion="moral_disgust",
+            manipulation_cues=["all_caps_urgency", "unverified_screenshot_appeal"],
+        )
+        assert framing.arousal_score == 0.88
+        assert framing.primary_emotion == "moral_disgust"
+        assert len(framing.manipulation_cues) == 2
+
+    def test_emotional_framing_bounds(self) -> None:
+        with pytest.raises(ValidationError):
+            EmotionalFraming(arousal_score=1.5, primary_emotion="outrage")
+
+        with pytest.raises(ValidationError):
+            EmotionalFraming(arousal_score=-0.2, primary_emotion="calm")
+
+    def test_extracted_claim_and_batch_serialization(self) -> None:
+        claim = ExtractedClaim(
+            claim_id="test-claim-1",
+            speaker="Senator Smith",
+            verbatim_quote="Tax rates will double by next month.",
+            normalized_claim="Tax rates will double next month.",
+            alleged_venue="Senate Hearing",
+            alleged_date="2026-11-19",
+            cited_urls=["https://reuters.com/tax-hearing"],
+            narrative_side="Side B",
+            emotional_framing=EmotionalFraming(
+                arousal_score=0.75,
+                primary_emotion="fear",
+                manipulation_cues=["catastrophic_hyperbole"],
+            ),
+        )
+        batch = ExtractionBatchResult(
+            raw_text_hash="abc123hash",
+            overall_emotional_intensity=0.75,
+            claims=[claim],
+        )
+        json_str = batch.model_dump_json()
+        restored = ExtractionBatchResult.model_validate_json(json_str)
+
+        assert restored.raw_text_hash == "abc123hash"
+        assert len(restored.claims) == 1
+        assert restored.claims[0].speaker == "Senator Smith"
+        assert restored.claims[0].narrative_side == "Side B"
+

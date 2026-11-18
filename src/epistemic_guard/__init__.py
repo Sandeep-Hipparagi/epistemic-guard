@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 from epistemic_guard.config import Settings, get_settings
+from epistemic_guard.extraction import ClaimExtractor, extract_urls
+from epistemic_guard.llm import StructuredLLMClient, clean_json_payload
 from epistemic_guard.schemas import (
     ClaimAuditRequest,
     DomainAuditResult,
+    EmotionalFraming,
     EvidenceProvenance,
     EvidenceType,
+    ExtractedClaim,
+    ExtractionBatchResult,
     ProvenanceAuditResult,
     ProvenanceVerdict,
     SourceRecord,
@@ -31,5 +36,12 @@ __all__ = [
     "SourceRecord",
     "ClaimAuditRequest",
     "ProvenanceAuditResult",
+    "EmotionalFraming",
+    "ExtractedClaim",
+    "ExtractionBatchResult",
     "DomainAuditor",
+    "StructuredLLMClient",
+    "clean_json_payload",
+    "ClaimExtractor",
+    "extract_urls",
 ]
