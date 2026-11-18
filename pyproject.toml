@@ -38,11 +38,6 @@ classifiers = [
     "Topic :: Security",
 ]
 
-[project.urls]
-Homepage = "https://github.com/Sandeep-Hipparagi/epistemic-guard"
-Repository = "https://github.com/Sandeep-Hipparagi/epistemic-guard"
-Issues = "https://github.com/Sandeep-Hipparagi/epistemic-guard/issues"
-Documentation = "https://github.com/Sandeep-Hipparagi/epistemic-guard/tree/main/docs"
 dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.2",
@@ -59,6 +54,12 @@ dependencies = [
     "uvicorn>=0.30.0",
     "mcp>=1.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Sandeep-Hipparagi/epistemic-guard"
+Repository = "https://github.com/Sandeep-Hipparagi/epistemic-guard"
+Issues = "https://github.com/Sandeep-Hipparagi/epistemic-guard/issues"
+Documentation = "https://github.com/Sandeep-Hipparagi/epistemic-guard/tree/main/docs"
 
 [project.scripts]
 epistemic-guard = "epistemic_guard.interfaces.cli:app"
