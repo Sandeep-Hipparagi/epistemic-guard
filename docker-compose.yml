@@ -1,0 +1,38 @@
+services:
+  epistemic-guard-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: epistemic-guard-api
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_BASE_URL=${LLM_BASE_URL:-http://localhost:11434/v1}
+      - LLM_API_KEY=${LLM_API_KEY:-ollama}
+      - LLM_MODEL_NAME=${LLM_MODEL_NAME:-llama3.2:latest}
+      - SEARCH_PROVIDER=${SEARCH_PROVIDER:-duckduckgo}
+      - SEARCH_API_KEY=${SEARCH_API_KEY:-}
+      - MAX_SEARCH_RESULTS=${MAX_SEARCH_RESULTS:-8}
+      - TEMPORAL_DRIFT_THRESHOLD_DAYS=${TEMPORAL_DRIFT_THRESHOLD_DAYS:-30}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Optional local Ollama inference service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: epistemic-guard-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    profiles:
+      - local-llm
+
+volumes:
+  ollama_data:
