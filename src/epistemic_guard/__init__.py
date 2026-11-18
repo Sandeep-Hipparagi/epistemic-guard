@@ -8,6 +8,11 @@ from epistemic_guard.graph import (
     EpistemicGuardPipeline,
     build_epistemic_graph,
 )
+from epistemic_guard.interfaces import (
+    cli_app,
+    create_app,
+    create_mcp_server,
+)
 from epistemic_guard.schemas import (
     ClaimAuditRequest,
     ClaimWithAudit,
@@ -86,4 +91,7 @@ __all__ = [
     "EpistemicGraphState",
     "build_epistemic_graph",
     "EpistemicGuardPipeline",
+    "cli_app",
+    "create_app",
+    "create_mcp_server",
 ]

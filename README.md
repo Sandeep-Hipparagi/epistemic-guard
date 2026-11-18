@@ -6,7 +6,7 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Pydantic v2](https://img.shields.io/badge/pydantic-v2.7+-green.svg)](https://docs.pydantic.dev/)
-[![Tests Passing](https://img.shields.io/badge/tests-63%20passed-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-73%20passed-brightgreen.svg)](tests/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 *A deterministic, zero-hallucination verification foundation to halt viral misinformation before emotional contagion spreads.*
@@ -96,6 +96,11 @@ epistemic-guard/
 │       │   ├── state.py        # Shared LangGraph state schema
 │       │   ├── nodes.py        # Extraction, audit, and synthesis graph nodes
 │       │   └── workflow.py     # EpistemicGuardPipeline & compiled StateGraph
+│       ├── interfaces/
+│       │   ├── __init__.py
+│       │   ├── cli.py          # Rich & Typer interactive terminal interface
+│       │   ├── api.py          # FastAPI REST service
+│       │   └── mcp_server.py   # Model Context Protocol (MCP) server for agents
 │       ├── llm/
 │       │   ├── __init__.py
 │       │   └── client.py       # Model-agnostic structured LLM client
@@ -111,7 +116,8 @@ epistemic-guard/
     ├── test_domain_auditor.py      # Provenance rules & source tiering test suite
     ├── test_extractor.py           # Extraction & Phase 0/1 handoff test suite
     ├── test_provenance_resolver.py # Active search, circular reporting & drift tests
-    └── test_workflow.py            # End-to-end two-sided listening pipeline tests
+    ├── test_workflow.py            # End-to-end two-sided listening pipeline tests
+    └── test_interfaces.py          # CLI, FastAPI, and MCP server interface tests
 ```
 
 ---
@@ -245,7 +251,58 @@ REQUEST_TIMEOUT=30.0
 SOURCE_TIERS_CONFIG_PATH=config/source_tiers.yaml
 STRICT_TIMESTAMP_ENFORCEMENT=true
 REQUIRE_PRIMARY_EVIDENCE_FOR_BREAKING=true
+
+SEARCH_PROVIDER=duckduckgo
+MAX_SEARCH_RESULTS=8
+TEMPORAL_DRIFT_DAYS_THRESHOLD=30
 ```
+
+---
+
+## 🖥️ Developer & User Interfaces (Phase 4)
+
+### 1. Interactive Rich CLI
+The CLI provides terminal pre-share friction banners, 3-criteria tables, and JSON piping:
+
+```bash
+# Fast domain accountability tier check
+epistemic-guard audit-url https://www.reuters.com/markets
+
+# End-to-end multi-perspective discourse audit
+epistemic-guard analyze "Official Envoy: Trade accord ratified https://www.reuters.com/markets/trade-accord-2026" "OUTRAGE! Secret surrender: https://x.com/critic/123"
+
+# Raw JSON output for automation scripts
+epistemic-guard analyze "Claim text" --json
+```
+
+### 2. FastAPI REST Microservice
+Run the production-grade HTTP service:
+
+```bash
+uvicorn epistemic_guard.interfaces.api:app --host 0.0.0.0 --port 8000
+```
+
+- `GET  /health` — Service liveness and version check.
+- `POST /v1/audit/url` — Classify any domain into accountability tiers (`{"url": "..."}`).
+- `POST /v1/analyze` — Run end-to-end two-sided listening synthesis (`{"texts": ["..."]}`).
+
+### 3. Model Context Protocol (MCP) Server for AI Agents
+Connect `epistemic-guard` directly to Claude Desktop, Cursor, or any MCP-enabled AI client:
+
+```json
+{
+  "mcpServers": {
+    "epistemic-guard": {
+      "command": "epistemic-guard-mcp"
+    }
+  }
+}
+```
+
+**Exposed MCP Tools:**
+- `audit_source_url(url: str)`: Classifies sources into Tiers 1–5 before citations.
+- `check_viral_claim(claim_text: str)`: Verifies single claims against Where, When, and Primary Media.
+- `listen_two_sides(texts: list[str])`: Executes two-sided synthesis, steel-manning, and asymmetry checks.
 
 ---
 
@@ -255,7 +312,8 @@ REQUIRE_PRIMARY_EVIDENCE_FOR_BREAKING=true
 - [x] **Phase 1:** Model-Agnostic Claim, Quote & Emotional Framing Extraction (`ClaimExtractor`, `StructuredLLMClient`, `extract_and_audit`).
 - [x] **Phase 2:** The 3-Criteria Provenance Retrieval Engine (`ProvenanceInvestigator`, `DuckDuckGoSearchProvider`, `TemporalAuditResult`, Circular Reporting Defense).
 - [x] **Phase 3:** Two-Sided Listening Topology & Multi-Perspective Synthesis (`EpistemicGuardPipeline`, `LangGraph`, Steel-Manned Summaries & Provenance Asymmetry).
-- [ ] **Phase 4:** CLI, REST API & Model Context Protocol (MCP) Server.
+- [x] **Phase 4:** Developer & User Interfaces (`Rich` CLI, `FastAPI` Service & `MCP` Agent Server).
+- [ ] **Phase 5:** Benchmark Evaluation Dataset, Rigorous Stress-Testing & Containerization.
 
 ---
 
