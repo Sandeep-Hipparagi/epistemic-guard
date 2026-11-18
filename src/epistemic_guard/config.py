@@ -71,6 +71,27 @@ class Settings(BaseSettings):
         description="Require audio, video, or named outlet before clearing viral breaking claims.",
     )
 
+    # Search & Retrieval Configuration (Phase 2)
+    search_provider: str = Field(
+        default="duckduckgo",
+        description="Active search provider: 'duckduckgo' (default, free), 'tavily', or 'mock'.",
+    )
+    search_api_key: Optional[SecretStr] = Field(
+        default=None,
+        description="Optional API key for authenticated search providers (e.g. Tavily).",
+    )
+    max_search_results: int = Field(
+        default=8,
+        ge=1,
+        le=50,
+        description="Maximum search results to retrieve per provenance query.",
+    )
+    temporal_drift_days_threshold: int = Field(
+        default=30,
+        ge=1,
+        description="Threshold in days to flag claims presenting old material as breaking news.",
+    )
+
     @property
     def is_local_endpoint(self) -> bool:
         """Return True if configured for local/private inference."""

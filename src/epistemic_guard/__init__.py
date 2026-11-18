@@ -19,6 +19,20 @@ from epistemic_guard.schemas import (
     WhereProvenance,
 )
 from epistemic_guard.tools.domain_auditor import DomainAuditor
+from epistemic_guard.tools.provenance_resolver import ProvenanceInvestigator
+from epistemic_guard.tools.search import (
+    DuckDuckGoSearchProvider,
+    MockSearchProvider,
+    SearchHit,
+    SearchProvider,
+    TavilySearchProvider,
+    build_provenance_queries,
+)
+from epistemic_guard.tools.temporal import (
+    TemporalAuditResult,
+    evaluate_temporal_consistency,
+    parse_flexible_date,
+)
 
 __version__ = "0.1.0"
 
@@ -44,4 +58,14 @@ __all__ = [
     "clean_json_payload",
     "ClaimExtractor",
     "extract_urls",
+    "SearchHit",
+    "SearchProvider",
+    "MockSearchProvider",
+    "DuckDuckGoSearchProvider",
+    "TavilySearchProvider",
+    "build_provenance_queries",
+    "TemporalAuditResult",
+    "evaluate_temporal_consistency",
+    "parse_flexible_date",
+    "ProvenanceInvestigator",
 ]

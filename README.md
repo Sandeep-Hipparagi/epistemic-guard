@@ -6,7 +6,7 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Pydantic v2](https://img.shields.io/badge/pydantic-v2.7+-green.svg)](https://docs.pydantic.dev/)
-[![Tests Passing](https://img.shields.io/badge/tests-47%20passed-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-58%20passed-brightgreen.svg)](tests/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 *A deterministic, zero-hallucination verification foundation to halt viral misinformation before emotional contagion spreads.*
@@ -77,7 +77,7 @@ flowchart TD
 ```text
 epistemic-guard/
 ├── pyproject.toml              # Build config, dependencies (PEP 517/621)
-├── .env.example                # OpenAI-compatible & engine environment template
+├── .env.example                # OpenAI-compatible & search environment template
 ├── .gitignore                  # Git exclusions for Python & environments
 ├── README.md                   # System documentation & methodology
 ├── config/
@@ -86,7 +86,7 @@ epistemic-guard/
 ├── src/
 │   └── epistemic_guard/
 │       ├── __init__.py         # Public API exports
-│       ├── config.py           # Pydantic Settings with OpenAI-compatible spec
+│       ├── config.py           # Pydantic Settings with OpenAI & search spec
 │       ├── schemas.py          # Strict Pydantic v2 data contracts
 │       ├── extraction/
 │       │   ├── __init__.py
@@ -96,14 +96,16 @@ epistemic-guard/
 │       │   └── client.py       # Model-agnostic structured LLM client
 │       └── tools/
 │           ├── __init__.py
-│           └── domain_auditor.py # Deterministic URL auditor & provenance engine
+│           ├── domain_auditor.py      # Deterministic URL auditor & source tiering
+│           ├── search.py              # Pluggable SearchProvider (DuckDuckGo, Tavily, Mock)
+│           ├── temporal.py            # Temporal drift & recycled content engine
+│           └── provenance_resolver.py # Active 3-criteria provenance investigator
 └── tests/
     ├── __init__.py
-    ├── test_schemas.py         # Data contracts & validation test suite
-    ├── test_domain_auditor.py  # Provenance rules & source tiering test suite
-    └── test_extractor.py       # Extraction & Phase 0/1 handoff test suite
-```
-    └── test_domain_auditor.py  # Provenance rules & source tiering test suite
+    ├── test_schemas.py             # Data contracts & validation test suite
+    ├── test_domain_auditor.py      # Provenance rules & source tiering test suite
+    ├── test_extractor.py           # Extraction & Phase 0/1 handoff test suite
+    └── test_provenance_resolver.py # Active search, circular reporting & drift tests
 ```
 
 ---
@@ -245,7 +247,7 @@ REQUIRE_PRIMARY_EVIDENCE_FOR_BREAKING=true
 
 - [x] **Phase 0:** Foundation, Repository Scaffold, Data Contracts, and Deterministic Source Tiering (Zero-Hallucination).
 - [x] **Phase 1:** Model-Agnostic Claim, Quote & Emotional Framing Extraction (`ClaimExtractor`, `StructuredLLMClient`, `extract_and_audit`).
-- [ ] **Phase 2:** Real-Time Corroboration & Web Search Nodes.
+- [x] **Phase 2:** The 3-Criteria Provenance Retrieval Engine (`ProvenanceInvestigator`, `DuckDuckGoSearchProvider`, `TemporalAuditResult`, Circular Reporting Defense).
 - [ ] **Phase 3:** Two-Sided Listening Topology & Multi-Perspective Synthesis.
 
 ---
