@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "epistemic-guard"
-version = "0.2.0"
+name = "provenance-guard"
+version = "0.2.1"
 description = "Open-source, model-agnostic provenance auditing and two-sided listening engine"
 readme = "README.md"
 license = { text = "Apache-2.0" }
