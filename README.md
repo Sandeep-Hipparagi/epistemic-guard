@@ -13,6 +13,9 @@
 [![MCP Ready](https://img.shields.io/badge/MCP-Ready-8A2BE2.svg)](src/epistemic_guard/interfaces/mcp_server.py)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
+> **PyPI distribution:** this project publishes as [`provenance-guard`](https://pypi.org/project/provenance-guard/) (the `epistemic-guard` name is taken on PyPI by an unrelated package).
+> Install with `pip install provenance-guard` and import as `import epistemic_guard`.
+
 *A deterministic, zero-hallucination verification foundation to halt viral misinformation before emotional contagion spreads.*
 
 [Quickstart](#-60-second-quickstart) • [The Philosophy](#-the-problem--epistemic-philosophy) • [Architecture](#-system-architecture) • [Use Cases](#-public-use-cases--integration-recipes) • [Benchmarks](#-benchmark-scorecard) • [Documentation](docs/)
@@ -346,6 +349,12 @@ If you use `epistemic-guard` in your academic research or applications, please c
   version = {0.2.0}
 }
 ```
+
+---
+
+## Ecosystem
+
+Epistemic Guard's deterministic source tiering is exercised by the portfolio's unified evaluation harness - see [agent-benchmark-suite](https://github.com/Sandeep-Hipparagi/agent-benchmark-suite).
 
 ---
 
