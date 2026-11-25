@@ -29,6 +29,13 @@ RUN useradd -m -u 1000 epistemicuser && \
     chown -R epistemicuser:epistemicuser /app
 USER epistemicuser
 
+# OCI labels for GitHub Packages repository linking
+LABEL org.opencontainers.image.source="https://github.com/Sandeep-Hipparagi/epistemic-guard" \
+      org.opencontainers.image.description="Open-source, model-agnostic provenance auditing and two-sided listening engine (published as provenance-guard on PyPI)" \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.title="Epistemic Guard (provenance-guard)" \
+      org.opencontainers.image.version="0.2.2"
+
 # Expose FastAPI REST service port
 EXPOSE 8000
 
