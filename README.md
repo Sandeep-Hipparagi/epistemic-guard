@@ -18,6 +18,14 @@
 
 *A deterministic, zero-hallucination verification foundation to halt viral misinformation before emotional contagion spreads.*
 
+## Product Walkthrough & Architecture Demo
+
+https://github.com/Sandeep-Hipparagi/epistemic-guard/releases/download/media-v1/brag.mp4
+
+[![epistemic-guard demo](assets/media/preview.webp)](https://github.com/Sandeep-Hipparagi/epistemic-guard/releases/tag/media-v1)
+
+---
+
 [Quickstart](#-60-second-quickstart) • [The Philosophy](#-the-problem--epistemic-philosophy) • [Architecture](#-system-architecture) • [Use Cases](#-public-use-cases--integration-recipes) • [Benchmarks](#-benchmark-scorecard) • [Documentation](docs/)
 
 </div>
